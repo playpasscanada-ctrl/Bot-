@@ -31,7 +31,7 @@ def keep_alive():
 if GEMINI_API_KEY:
     genai.configure(api_key=GEMINI_API_KEY)
     # 'gemini-1.5-flash' use kar rahe hain jo FREE aur FAST hai
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    model = genai.GenerativeModel('gemini-pro')
 else:
     print("⚠️ WARNING: GEMINI_API_KEY nahi mili!")
 
