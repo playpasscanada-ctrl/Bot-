@@ -48,6 +48,45 @@ async def on_ready():
     except Exception as e:
         print(f"❌ Sync Error: {e}")
 
+# ================== ON MENTION (TAG) LOGIC ==================
+@bot.event
+async def on_message(message):
+    # 1. Agar message khud bot ka hai, to ignore karo
+    if message.author == bot.user:
+        return
+
+    # 2. Agar koi Bot ko TAG kare (Mention)
+    if bot.user.mentioned_in(message) and not message.mention_everyone:
+        # User ka message saaf karein (Tag hatayein taaki AI confuse na ho)
+        clean_text = message.content.replace(f'<@{bot.user.id}>', '').strip()
+        
+        # Agar khali tag kiya ho (Bina kuch likhe)
+        if not clean_text:
+            clean_text = "Haan bhai, kya haal hai? Kuch poocho toh sahi!"
+
+        # Typing indicator (Taaki user ko lage bot likh raha hai)
+        async with message.channel.typing():
+            try:
+                if not GEMINI_API_KEY:
+                    await message.reply("❌ Admin ne API Key set nahi ki hai.")
+                    return
+
+                # AI Prompt (Yahan bot ka attitude set karo)
+                prompt = f"You are a savage, funny, and roasted Discord bot. User said: '{clean_text}'. Reply in Hinglish (Hindi+English) short and funny."
+                
+                # Generate Answer
+                response = await model.generate_content_async(prompt)
+                reply_text = response.text
+
+                # Message bhejo
+                await message.reply(reply_text)
+
+            except Exception as e:
+                await message.reply(f"❌ Dimag kharab ho gaya mera (Error): {e}")
+
+    # 3. Ye line ZAROORI hai, warna baaki commands (SLASH) kaam nahi karengi
+    await bot.process_commands(message)
+
 # ================= COMMAND: /ask (AI Chat) =================
 @bot.tree.command(name="ask", description="Ask anything to the AI Bot")
 async def ask(interaction: discord.Interaction, question: str):
